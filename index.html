@@ -2,922 +2,316 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Crispy Music</title>
 <style>
   :root{
-    --ink:        #12161b;
-    --panel:      #191f26;
-    --panel-2:    #202832;
-    --line:       rgba(236,230,216,0.08);
-    --line-strong:rgba(236,230,216,0.16);
-    --brass:      #c9a24b;
-    --brass-dim:  #8c7439;
-    --label-red:  #a4433f;
-    --cream:      #ece6d8;
-    --muted:      #8a93a1;
-    --danger:     #c15b52;
-
-    --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-    --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono:    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    --bg: #1a1a1a;
+    --panel: #242424;
+    --accent: #ff8a3d;
+    --text: #f2f2f2;
+    --muted: #999;
   }
-
   *{ box-sizing: border-box; }
-  html,body{ height:100%; }
   body{
     margin:0;
-    background:
-      radial-gradient(1100px 700px at 50% -10%, rgba(201,162,75,0.08), transparent 60%),
-      var(--ink);
-    color: var(--cream);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    overflow-x:hidden;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
   }
-
-  /* focus visibility */
-  button:focus-visible, [tabindex]:focus-visible, input:focus-visible{
-    outline: 2px solid var(--brass);
-    outline-offset: 3px;
-  }
-
   .app{
-    max-width: 480px;
+    max-width: 420px;
     margin: 0 auto;
-    min-height: 100dvh;
+    min-height: 100vh;
     display:flex;
     flex-direction:column;
-    position:relative;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 12%);
   }
 
-  /* ---------- Header ---------- */
-  .app-header{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    padding: 22px 22px 6px;
-    letter-spacing: 0.12em;
-  }
-  .wordmark{
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--cream);
-    letter-spacing: 0.14em;
-  }
-  .wordmark span{ color: var(--brass); }
-  .view-label{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-  }
-
-  /* ---------- Views ---------- */
-  .view{
-    flex:1;
-    display:none;
-    min-height:0;
-  }
-  .view.active{ display:flex; flex-direction:column; }
-
-  /* ---------- HOME VIEW ---------- */
-  #view-home{
-    align-items:center;
-    padding: 10px 24px 8px;
+  h1{
     text-align:center;
+    font-size: 22px;
+    padding: 20px 0 4px;
+    margin:0;
   }
+  h1 span{ color: var(--accent); }
 
-  .turntable{
-    width: 100%;
-    max-width: 300px;
-    margin: 18px auto 6px;
-    position:relative;
-  }
+  .view{ display:none; flex:1; padding: 10px 20px 20px; }
+  .view.active{ display:block; }
 
-  .vinyl-wrap{
-    width:100%;
-    aspect-ratio: 1/1;
-    position:relative;
-  }
+  /* HOME */
+  #home{ text-align:center; }
 
-  .vinyl{
-    width:100%;
-    height:100%;
-    transform-origin:50% 50%;
-    filter: drop-shadow(0 18px 30px rgba(0,0,0,0.55));
-  }
-  .vinyl.spin{
-    animation: spin 3.2s linear infinite;
-  }
-  @keyframes spin{ to{ transform: rotate(360deg); } }
-
-  .tonearm{
-    position:absolute;
-    top:-6%;
-    right:-8%;
-    width:46%;
-    height:46%;
-    transform-origin: 88% 12%;
-    transform: rotate(-30deg);
-    transition: transform 0.5s cubic-bezier(.4,0,.2,1);
-    filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
-  }
-  .tonearm.down{ transform: rotate(-4deg); }
-
-  .status-pill{
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    padding: 4px 12px;
-    display:inline-block;
-    margin-top: 4px;
-  }
-  .status-pill.live{ color: var(--brass); border-color: var(--brass-dim); }
-
-  .track-title{
-    font-family: var(--font-display);
-    font-size: 26px;
-    line-height:1.25;
-    margin: 16px 0 2px;
-    color: var(--cream);
-    min-height: 1.3em;
-    overflow-wrap: anywhere;
-  }
-  .track-meta{
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    min-height: 1.4em;
-  }
-
-  .progress-row{
-    width:100%;
-    margin-top: 20px;
+  .cover{
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), #7a3cff);
     display:flex;
     align-items:center;
-    gap:10px;
+    justify-content:center;
+    font-size: 60px;
   }
-  .time{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    width: 38px;
-    flex-shrink:0;
-  }
-  .time.right{ text-align:right; }
 
-  .progress-track{
-    position:relative;
-    flex:1;
-    height: 18px;
-    display:flex;
-    align-items:center;
+  #title{ font-size: 18px; font-weight:600; margin-top: 10px; }
+  #filename{ font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .progress{
+    width:100%;
+    height: 6px;
+    background: #3a3a3a;
+    border-radius: 4px;
+    margin: 20px 0 6px;
     cursor:pointer;
-  }
-  .progress-groove{
-    width:100%;
-    height:3px;
-    background: var(--line-strong);
-    border-radius:3px;
-    position:relative;
     overflow:hidden;
   }
-  .progress-fill{
-    position:absolute;
-    left:0; top:0; bottom:0;
-    width:0%;
-    background: linear-gradient(90deg, var(--brass-dim), var(--brass));
-    border-radius:3px;
-  }
-  .progress-knob{
-    position:absolute;
-    top:50%;
-    left:0%;
-    width:12px; height:12px;
-    background: var(--brass);
-    border-radius:50%;
-    transform: translate(-50%,-50%);
-    box-shadow: 0 0 0 4px rgba(201,162,75,0.15);
-  }
+  .progress-fill{ height:100%; width:0%; background: var(--accent); }
+  .times{ display:flex; justify-content:space-between; font-size:12px; color: var(--muted); }
 
   .controls{
     display:flex;
-    align-items:center;
     justify-content:center;
-    gap: 22px;
-    margin-top: 22px;
-  }
-  .ctrl-btn{
-    background: none;
-    border: none;
-    color: var(--cream);
-    cursor:pointer;
-    padding: 8px;
-    display:flex;
     align-items:center;
-    justify-content:center;
-    border-radius: 50%;
-    transition: color 0.15s, background 0.15s, transform 0.1s;
+    gap: 18px;
+    margin-top: 20px;
   }
-  .ctrl-btn:hover{ color: var(--brass); background: rgba(201,162,75,0.08); }
-  .ctrl-btn:active{ transform: scale(0.92); }
-  .ctrl-btn svg{ width:20px; height:20px; }
-
-  .ctrl-btn.reset svg{ width:17px; height:17px; }
-  .ctrl-btn.reset{ color: var(--muted); }
-  .ctrl-btn.reset:hover{ color: var(--danger); }
-
-  .play-btn{
-    width: 62px; height:62px;
-    border-radius:50%;
-    background: linear-gradient(180deg, var(--brass), var(--brass-dim));
-    color: var(--ink);
-    border:none;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    box-shadow: 0 10px 24px rgba(201,162,75,0.25), inset 0 1px 0 rgba(255,255,255,0.3);
-    transition: transform 0.12s;
-  }
-  .play-btn:hover{ transform: translateY(-1px); }
-  .play-btn:active{ transform: scale(0.94); }
-  .play-btn svg{ width:22px; height:22px; }
-  .play-btn.playing svg{ width:18px; height:18px; }
-
-  .hint{
-    margin-top: 18px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    opacity: 0.8;
-  }
-  .hint strong{ color: var(--brass); font-weight:600; }
-
-  /* ---------- MUSIC (LIBRARY) VIEW ---------- */
-  #view-music{
-    padding: 6px 0 0;
-    min-height:0;
-  }
-  .library-head{
-    padding: 4px 22px 12px;
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    border-bottom: 1px solid var(--line);
-  }
-  .library-head h1{
-    font-family: var(--font-display);
-    font-size: 20px;
-    margin:0;
-  }
-  .library-count{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .track-list{
-    list-style:none;
-    margin:0;
-    padding: 4px 10px 12px;
-    overflow-y:auto;
-    flex:1;
-  }
-  .track-row{
-    display:flex;
-    align-items:center;
-    gap: 14px;
-    padding: 12px 12px;
-    border-radius: 10px;
-    cursor:pointer;
-    transition: background 0.15s;
-  }
-  .track-row:hover{ background: var(--panel); }
-  .track-row.active{ background: var(--panel-2); }
-
-  .track-num{
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--muted);
-    width: 22px;
-    flex-shrink:0;
-    text-align:right;
-  }
-  .track-row.active .track-num{ color: var(--brass); }
-
-  .track-eq{
-    width:14px; height:14px; flex-shrink:0;
-    display:flex; align-items:flex-end; gap:2px;
-    visibility:hidden;
-  }
-  .track-row.active.playing-row .track-eq{ visibility:visible; }
-  .track-eq i{
-    display:block; width:3px; background: var(--brass);
-    animation: eq 0.9s ease-in-out infinite;
-    border-radius:1px;
-  }
-  .track-eq i:nth-child(1){ height:40%; animation-delay:0s; }
-  .track-eq i:nth-child(2){ height:100%; animation-delay:0.2s; }
-  .track-eq i:nth-child(3){ height:65%; animation-delay:0.4s; }
-  @keyframes eq{ 0%,100%{ transform: scaleY(0.4);} 50%{ transform: scaleY(1);} }
-
-  .track-info{ flex:1; min-width:0; }
-  .track-name{
-    font-size: 14.5px;
-    color: var(--cream);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .track-row.active .track-name{ color: var(--brass); }
-  .track-file{
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    color: var(--muted);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    margin-top:1px;
-  }
-
-  .empty-state{
-    padding: 40px 24px;
-    text-align:center;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    line-height:1.7;
-  }
-  .empty-state strong{ color: var(--brass); }
-  .empty-state code{
-    background: var(--panel-2);
-    padding: 1px 6px;
-    border-radius: 4px;
-    color: var(--cream);
-  }
-
-  /* ---------- Mini bar (shown on Music view when a track is loaded) ---------- */
-  .mini-bar{
-    display:none;
-    align-items:center;
-    gap:12px;
-    padding: 10px 16px;
-    margin: 0 10px 8px;
+  .controls button{
     background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
+    border: none;
+    color: var(--text);
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    font-size: 18px;
     cursor:pointer;
   }
-  .mini-bar.show{ display:flex; }
-  .mini-vinyl{
-    width:34px; height:34px; border-radius:50%;
-    background: radial-gradient(circle at 50% 50%, var(--label-red) 0 22%, #0e1116 23% 40%, #05070a 41% 100%);
-    flex-shrink:0;
-    transform-origin:50% 50%;
+  #play{
+    width: 62px; height: 62px;
+    background: var(--accent);
+    color: #1a1a1a;
+    font-size: 22px;
   }
-  .mini-vinyl.spin{ animation: spin 3.2s linear infinite; }
-  .mini-info{ flex:1; min-width:0; }
-  .mini-title{
-    font-size: 13px; color: var(--cream);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .mini-progress{
-    height:2px; background: var(--line-strong); border-radius:2px; margin-top:6px; overflow:hidden;
-  }
-  .mini-progress-fill{ height:100%; width:0%; background: var(--brass); }
-  .mini-play{
-    width:30px; height:30px; border-radius:50%;
-    background: var(--panel-2);
-    border:1px solid var(--line-strong);
-    display:flex; align-items:center; justify-content:center;
-    color: var(--cream);
-    flex-shrink:0;
-  }
-  .mini-play svg{ width:12px; height:12px; }
+  .controls button:hover{ opacity: 0.85; }
 
-  /* ---------- Bottom nav ---------- */
-  .bottom-nav{
+  /* MUSIC LIST */
+  #music h2{ font-size:18px; margin: 10px 0; }
+  #list{ list-style:none; margin:0; padding:0; }
+  #list li{
+    padding: 12px 10px;
+    border-bottom: 1px solid #333;
+    cursor:pointer;
     display:flex;
-    border-top: 1px solid var(--line);
-    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.25));
-    padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
-    flex-shrink:0;
+    justify-content:space-between;
   }
-  .nav-btn{
+  #list li:hover{ background: var(--panel); }
+  #list li.active{ color: var(--accent); }
+  .empty{ color: var(--muted); font-size: 14px; line-height:1.6; padding-top: 10px;}
+  .empty code{ background: var(--panel); padding: 1px 5px; border-radius:4px; }
+
+  /* NAV */
+  nav{
+    display:flex;
+    border-top: 1px solid #333;
+  }
+  nav button{
     flex:1;
     background:none;
     border:none;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    padding: 8px 4px 4px;
     color: var(--muted);
+    padding: 14px 0;
+    font-size: 13px;
     cursor:pointer;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.08em;
-    text-transform:uppercase;
-    border-radius: 10px;
-    transition: color 0.15s;
   }
-  .nav-btn svg{ width:20px; height:20px; }
-  .nav-btn.active{ color: var(--brass); }
-  .nav-btn:hover{ color: var(--cream); }
-  .nav-btn.active:hover{ color: var(--brass); }
+  nav button.active{ color: var(--accent); font-weight:600; }
 
   audio{ display:none; }
-
-  @media (prefers-reduced-motion: reduce){
-    .vinyl.spin, .mini-vinyl.spin, .track-eq i{ animation: none !important; }
-  }
 </style>
 </head>
 <body>
-
 <div class="app">
 
-  <div class="app-header">
-    <div class="wordmark">SPIND<span>L</span>E</div>
-    <div class="view-label" id="view-label">On the deck</div>
-  </div>
+  <h1>Crispy <span>Music</span></h1>
 
-  <!-- ============ HOME VIEW ============ -->
-  <section id="view-home" class="view active">
+  <section id="home" class="view active">
+    <div class="cover">🎵</div>
+    <div id="title">Nothing playing</div>
+    <div id="filename">Press Home to pick a random song</div>
 
-    <div class="turntable">
-      <div class="vinyl-wrap">
-        <svg class="vinyl" id="vinyl" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r="98" fill="#05070a"/>
-          <circle cx="100" cy="100" r="98" fill="none" stroke="rgba(236,230,216,0.05)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(236,230,216,0.05)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(236,230,216,0.05)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="62" fill="none" stroke="rgba(236,230,216,0.06)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(236,230,216,0.06)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="44" fill="url(#labelGrad)"/>
-          <circle cx="100" cy="100" r="44" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="1"/>
-          <circle cx="100" cy="100" r="3.2" fill="#12161b"/>
-          <defs>
-            <radialGradient id="labelGrad" cx="35%" cy="30%" r="75%">
-              <stop offset="0%" stop-color="#c25a54"/>
-              <stop offset="100%" stop-color="#8f3a37"/>
-            </radialGradient>
-          </defs>
-        </svg>
-        <svg class="tonearm" id="tonearm" viewBox="0 0 100 100">
-          <circle cx="88" cy="12" r="7" fill="#2a323c" stroke="rgba(236,230,216,0.2)" stroke-width="1"/>
-          <rect x="14" y="9" width="76" height="5" rx="2.5" fill="#2a323c"/>
-          <circle cx="14" cy="11.5" r="5" fill="#c9a24b"/>
-        </svg>
-      </div>
+    <div class="progress" id="progress">
+      <div class="progress-fill" id="progressFill"></div>
     </div>
-
-    <div class="status-pill" id="status-pill">idle</div>
-    <div class="track-title" id="track-title">Nothing on the deck</div>
-    <div class="track-meta" id="track-meta">Hit Home to drop the needle on something random</div>
-
-    <div class="progress-row">
-      <span class="time" id="time-current">0:00</span>
-      <div class="progress-track" id="progress-track">
-        <div class="progress-groove">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-knob" id="progress-knob"></div>
-      </div>
-      <span class="time right" id="time-remaining">-0:00</span>
+    <div class="times">
+      <span id="current">0:00</span>
+      <span id="duration">0:00</span>
     </div>
 
     <div class="controls">
-      <button class="ctrl-btn reset" id="btn-reset" title="Restart song" aria-label="Restart song">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 3-6.7"/>
-          <path d="M3 4v5h5"/>
-        </svg>
-      </button>
-      <button class="ctrl-btn" id="btn-prev" title="Previous" aria-label="Previous song">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M6 5h2v14H6zM20 5v14l-11-7z"/>
-        </svg>
-      </button>
-      <button class="play-btn" id="btn-play" title="Play" aria-label="Play">
-        <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z"/>
-        </svg>
-      </button>
-      <button class="ctrl-btn" id="btn-next" title="Next" aria-label="Next song">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M16 5h2v14h-2zM4 5v14l11-7z"/>
-        </svg>
-      </button>
-      <span style="width:36px;"></span>
-    </div>
-
-    <div class="hint">Press <strong>Home</strong> anytime to shuffle a new track</div>
-  </section>
-
-  <!-- ============ MUSIC (LIBRARY) VIEW ============ -->
-  <section id="view-music" class="view">
-    <div class="library-head">
-      <h1>Library</h1>
-      <span class="library-count" id="library-count">0 tracks</span>
-    </div>
-    <ul class="track-list" id="track-list"></ul>
-    <div class="mini-bar" id="mini-bar">
-      <div class="mini-vinyl" id="mini-vinyl"></div>
-      <div class="mini-info">
-        <div class="mini-title" id="mini-title">—</div>
-        <div class="mini-progress"><div class="mini-progress-fill" id="mini-progress-fill"></div></div>
-      </div>
-      <div class="mini-play" id="mini-play">
-        <svg id="mini-play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </div>
+      <button id="prev" title="Previous">⏮</button>
+      <button id="reset" title="Restart">⟲</button>
+      <button id="play" title="Play">▶</button>
+      <button id="next" title="Next">⏭</button>
     </div>
   </section>
 
-  <!-- ============ BOTTOM NAV ============ -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-home" aria-label="Home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 11.5 12 4l9 7.5"/>
-        <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
-      </svg>
-      Home
-    </button>
-    <button class="nav-btn" id="nav-music" aria-label="Music">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
-      </svg>
-      Music
-    </button>
+  <section id="music" class="view">
+    <h2>Music</h2>
+    <ul id="list"></ul>
+  </section>
+
+  <nav>
+    <button id="navHome" class="active">Home</button>
+    <button id="navMusic">Music</button>
   </nav>
 
-  <audio id="audio" preload="metadata"></audio>
+  <audio id="audio"></audio>
 </div>
 
 <script>
+/* =====================================================================
+   1) Put your mp3 files inside the "music" folder next to this file.
+   2) List them here, EXACTLY matching the filenames (including .mp3).
+      "title" is optional — leave it out and the filename is used.
+   ===================================================================== */
 const SONGS = [
-  { file: "Tunnel Vision ft. Fed.mp3", title: "Tunnel Vision" },
+  { file: "song1.mp3", title: "Song One" },
+  { file: "song2.mp3", title: "Song Two" },
+  { file: "song3.mp3", title: "Song Three" },
 ];
-(function(){
 
-  /* ======================================================================
-     SONG LIBRARY
-     ----------------------------------------------------------------------
-     Put your .mp3 files inside the "music" folder next to this index.html.
-     Then list them below. "title" and "artist" are optional — if you skip
-     them, the filename is used as the title automatically.
+const MUSIC_FOLDER = "music/";
 
-     Example:
-       { file: "Sunset Drive.mp3", title: "Sunset Drive", artist: "Nova" },
-       { file: "lofi-rain.mp3" }   <- title will just show as "lofi-rain"
+/* ===================================================================== */
 
-     If you leave SONGS empty AND you're running this through a local web
-     server (e.g. `python3 -m http.server` from this folder, then open
-     http://localhost:8000), Spindle will try to auto-detect mp3 files by
-     reading the folder listing. Opening index.html directly by double-
-     click (file://) will NOT auto-detect — the array below is required
-     in that case, since browsers block that kind of local file access.
-  ========================================================================= */
-  const SONGS = [
-    // { file: "example-song.mp3", title: "Example Song", artist: "Unknown Artist" },
-  ];
+const audio = document.getElementById('audio');
+let current = -1;
+let playing = false;
 
-  const MUSIC_FOLDER = "music/";
+const el = {
+  title: document.getElementById('title'),
+  filename: document.getElementById('filename'),
+  progress: document.getElementById('progress'),
+  progressFill: document.getElementById('progressFill'),
+  currentT: document.getElementById('current'),
+  durationT: document.getElementById('duration'),
+  play: document.getElementById('play'),
+  list: document.getElementById('list'),
+  navHome: document.getElementById('navHome'),
+  navMusic: document.getElementById('navMusic'),
+  home: document.getElementById('home'),
+  music: document.getElementById('music'),
+};
 
-  /* ---------------------------------------------------------------------- */
+function formatTime(s){
+  if(!isFinite(s) || s < 0) s = 0;
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60);
+  return m + ":" + String(sec).padStart(2,"0");
+}
 
-  let library = [];      // resolved list of {file, title, artist}
-  let currentIndex = -1;
-  let isPlaying = false;
-  let hasLoadedOnce = false;
-
-  const audio = document.getElementById('audio');
-
-  const el = {
-    viewLabel: document.getElementById('view-label'),
-    vinyl: document.getElementById('vinyl'),
-    tonearm: document.getElementById('tonearm'),
-    statusPill: document.getElementById('status-pill'),
-    trackTitle: document.getElementById('track-title'),
-    trackMeta: document.getElementById('track-meta'),
-    timeCurrent: document.getElementById('time-current'),
-    timeRemaining: document.getElementById('time-remaining'),
-    progressTrack: document.getElementById('progress-track'),
-    progressFill: document.getElementById('progress-fill'),
-    progressKnob: document.getElementById('progress-knob'),
-    btnPlay: document.getElementById('btn-play'),
-    playIcon: document.getElementById('play-icon'),
-    btnReset: document.getElementById('btn-reset'),
-    btnPrev: document.getElementById('btn-prev'),
-    btnNext: document.getElementById('btn-next'),
-    navHome: document.getElementById('nav-home'),
-    navMusic: document.getElementById('nav-music'),
-    viewHome: document.getElementById('view-home'),
-    viewMusic: document.getElementById('view-music'),
-    trackList: document.getElementById('track-list'),
-    libraryCount: document.getElementById('library-count'),
-    miniBar: document.getElementById('mini-bar'),
-    miniVinyl: document.getElementById('mini-vinyl'),
-    miniTitle: document.getElementById('mini-title'),
-    miniProgressFill: document.getElementById('mini-progress-fill'),
-    miniPlay: document.getElementById('mini-play'),
-    miniPlayIcon: document.getElementById('mini-play-icon'),
-  };
-
-  const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
-  const ICON_PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
-
-  function titleFromFilename(name){
-    const base = name.replace(/\.[^/.]+$/, "");
-    return base.replace(/[_-]+/g, " ").trim();
+function renderList(){
+  el.list.innerHTML = "";
+  if(SONGS.length === 0){
+    el.list.innerHTML = '<div class="empty">No songs listed yet. Open <code>index.html</code>, find the <code>SONGS</code> list near the top of the script, and add your mp3 filenames there.</div>';
+    return;
   }
-
-  function formatTime(sec){
-    if (!isFinite(sec) || sec < 0) sec = 0;
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ":" + String(s).padStart(2, "0");
-  }
-
-  /* ---------------- library setup ---------------- */
-
-  async function tryAutoDetect(){
-    try{
-      const res = await fetch(MUSIC_FOLDER);
-      if (!res.ok) return [];
-      const html = await res.text();
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const links = Array.from(doc.querySelectorAll('a'));
-      const files = links
-        .map(a => decodeURIComponent(a.getAttribute('href') || ''))
-        .filter(href => /\.mp3$/i.test(href))
-        .map(href => href.split('/').pop());
-      return [...new Set(files)].map(file => ({ file }));
-    } catch (e){
-      return [];
-    }
-  }
-
-  async function buildLibrary(){
-    let source = SONGS;
-    if (!source || source.length === 0){
-      source = await tryAutoDetect();
-    }
-    library = source.map(s => ({
-      file: s.file,
-      title: s.title || titleFromFilename(s.file),
-      artist: s.artist || ""
-    }));
-    renderPlaylist();
-  }
-
-  function renderPlaylist(){
-    el.libraryCount.textContent = library.length + (library.length === 1 ? " track" : " tracks");
-    el.trackList.innerHTML = "";
-
-    if (library.length === 0){
-      el.trackList.innerHTML =
-        '<li class="empty-state">No tracks found yet.<br><br>' +
-        'Drop some <strong>.mp3</strong> files into the <code>music</code> folder, ' +
-        'then list them in the <code>SONGS</code> array near the top of the ' +
-        '<code>&lt;script&gt;</code> in <code>index.html</code>.</li>';
-      return;
-    }
-
-    library.forEach((song, i) => {
-      const li = document.createElement('li');
-      li.className = 'track-row';
-      li.dataset.index = i;
-      li.innerHTML =
-        '<span class="track-num">' + String(i + 1).padStart(2, '0') + '</span>' +
-        '<span class="track-eq"><i></i><i></i><i></i></span>' +
-        '<span class="track-info">' +
-          '<div class="track-name">' + escapeHtml(song.title) + '</div>' +
-          '<div class="track-file">' + escapeHtml(song.artist || song.file) + '</div>' +
-        '</span>';
-      li.addEventListener('click', () => {
-        loadSong(i, true);
-      });
-      el.trackList.appendChild(li);
-    });
-    highlightActiveRow();
-  }
-
-  function escapeHtml(str){
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
-  }
-
-  function highlightActiveRow(){
-    const rows = el.trackList.querySelectorAll('.track-row');
-    rows.forEach(row => {
-      const idx = Number(row.dataset.index);
-      row.classList.toggle('active', idx === currentIndex);
-      row.classList.toggle('playing-row', idx === currentIndex && isPlaying);
-    });
-  }
-
-  /* ---------------- playback ---------------- */
-
-  function loadSong(index, autoplay){
-    if (library.length === 0) return;
-    if (index < 0) index = library.length - 1;
-    if (index >= library.length) index = 0;
-
-    currentIndex = index;
-    hasLoadedOnce = true;
-    const song = library[index];
-
-    audio.src = MUSIC_FOLDER + encodeURIComponent(song.file);
-    el.trackTitle.textContent = song.title;
-    el.trackMeta.textContent = song.artist ? (song.artist + " · " + song.file) : song.file;
-    el.miniTitle.textContent = song.title;
-
-    el.statusPill.textContent = "loading";
-    el.statusPill.classList.remove('live');
-
-    resetProgressUI();
-    highlightActiveRow();
-
-    if (autoplay){
-      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    } else {
-      setPlaying(false);
-    }
-  }
-
-  function pickRandomIndex(){
-    if (library.length === 0) return -1;
-    if (library.length === 1) return 0;
-    let idx;
-    do {
-      idx = Math.floor(Math.random() * library.length);
-    } while (idx === currentIndex);
-    return idx;
-  }
-
-  function playRandom(){
-    const idx = pickRandomIndex();
-    if (idx === -1){
-      el.trackTitle.textContent = "No tracks found";
-      el.trackMeta.textContent = "Add mp3 files to the music folder";
-      return;
-    }
-    loadSong(idx, true);
-  }
-
-  function togglePlay(){
-    if (currentIndex === -1){
-      playRandom();
-      return;
-    }
-    if (isPlaying){
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    }
-  }
-
-  function resetSong(){
-    if (currentIndex === -1) return;
-    audio.currentTime = 0;
-    updateProgress();
-  }
-
-  function nextSong(){
-    if (library.length === 0) return;
-    loadSong(currentIndex + 1, true);
-  }
-
-  function prevSong(){
-    if (library.length === 0) return;
-    loadSong(currentIndex - 1, true);
-  }
-
-  function setPlaying(playing){
-    isPlaying = playing;
-    el.vinyl.classList.toggle('spin', playing);
-    el.tonearm.classList.toggle('down', playing || hasLoadedOnce);
-    el.miniVinyl.classList.toggle('spin', playing);
-    el.statusPill.textContent = playing ? "playing" : (hasLoadedOnce ? "paused" : "idle");
-    el.statusPill.classList.toggle('live', playing);
-
-    el.playIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
-    el.btnPlay.classList.toggle('playing', playing);
-    el.btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-
-    el.miniPlayIcon.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
-
-    highlightActiveRow();
-  }
-
-  function resetProgressUI(){
-    el.progressFill.style.width = "0%";
-    el.progressKnob.style.left = "0%";
-    el.timeCurrent.textContent = "0:00";
-    el.timeRemaining.textContent = "-0:00";
-    el.miniProgressFill.style.width = "0%";
-  }
-
-  function updateProgress(){
-    const dur = audio.duration || 0;
-    const cur = audio.currentTime || 0;
-    const pct = dur > 0 ? (cur / dur) * 100 : 0;
-    el.progressFill.style.width = pct + "%";
-    el.progressKnob.style.left = pct + "%";
-    el.timeCurrent.textContent = formatTime(cur);
-    el.timeRemaining.textContent = "-" + formatTime(Math.max(dur - cur, 0));
-    el.miniProgressFill.style.width = pct + "%";
-  }
-
-  function seekFromEvent(clientX){
-    const rect = el.progressTrack.getBoundingClientRect();
-    let pct = (clientX - rect.left) / rect.width;
-    pct = Math.min(1, Math.max(0, pct));
-    if (audio.duration){
-      audio.currentTime = pct * audio.duration;
-      updateProgress();
-    }
-  }
-
-  /* ---------------- view switching ---------------- */
-
-  function showView(name){
-    const home = name === 'home';
-    el.viewHome.classList.toggle('active', home);
-    el.viewMusic.classList.toggle('active', !home);
-    el.navHome.classList.toggle('active', home);
-    el.navMusic.classList.toggle('active', !home);
-    el.viewLabel.textContent = home ? "On the deck" : "Library";
-    el.miniBar.classList.toggle('show', !home && hasLoadedOnce);
-  }
-
-  /* ---------------- event wiring ---------------- */
-
-  el.navHome.addEventListener('click', () => {
-    showView('home');
-    playRandom();
+  SONGS.forEach((song, i) => {
+    const li = document.createElement('li');
+    li.textContent = song.title || song.file;
+    li.dataset.i = i;
+    li.addEventListener('click', () => loadSong(i, true));
+    el.list.appendChild(li);
   });
+  highlightList();
+}
 
-  el.navMusic.addEventListener('click', () => {
-    showView('music');
-    el.miniBar.classList.toggle('show', hasLoadedOnce);
+function highlightList(){
+  [...el.list.children].forEach(li => {
+    li.classList.toggle('active', Number(li.dataset.i) === current);
   });
+}
 
-  el.btnPlay.addEventListener('click', togglePlay);
-  el.btnReset.addEventListener('click', resetSong);
-  el.btnNext.addEventListener('click', nextSong);
-  el.btnPrev.addEventListener('click', prevSong);
-  el.miniPlay.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
-  el.miniBar.addEventListener('click', () => showView('home'));
+function loadSong(i, autoplay){
+  if(SONGS.length === 0) return;
+  if(i < 0) i = SONGS.length - 1;
+  if(i >= SONGS.length) i = 0;
+  current = i;
+  const song = SONGS[i];
+  audio.src = MUSIC_FOLDER + encodeURIComponent(song.file);
+  el.title.textContent = song.title || song.file;
+  el.filename.textContent = song.file;
+  highlightList();
+  if(autoplay){
+    audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+  }
+}
 
-  let dragging = false;
-  el.progressTrack.addEventListener('mousedown', (e) => { dragging = true; seekFromEvent(e.clientX); });
-  window.addEventListener('mousemove', (e) => { if (dragging) seekFromEvent(e.clientX); });
-  window.addEventListener('mouseup', () => dragging = false);
-  el.progressTrack.addEventListener('touchstart', (e) => { dragging = true; seekFromEvent(e.touches[0].clientX); }, {passive:true});
-  el.progressTrack.addEventListener('touchmove', (e) => { if (dragging) seekFromEvent(e.touches[0].clientX); }, {passive:true});
-  el.progressTrack.addEventListener('touchend', () => dragging = false);
+function playRandom(){
+  if(SONGS.length === 0){
+    el.title.textContent = "No songs found";
+    el.filename.textContent = "Add mp3s to the music folder and list them in SONGS";
+    return;
+  }
+  let i;
+  do{ i = Math.floor(Math.random() * SONGS.length); }
+  while(SONGS.length > 1 && i === current);
+  loadSong(i, true);
+}
 
-  audio.addEventListener('timeupdate', updateProgress);
-  audio.addEventListener('loadedmetadata', updateProgress);
-  audio.addEventListener('play', () => setPlaying(true));
-  audio.addEventListener('pause', () => setPlaying(false));
-  audio.addEventListener('ended', () => nextSong());
-  audio.addEventListener('error', () => {
-    if (currentIndex !== -1){
-      el.trackMeta.textContent = "Couldn't load this file — check it's in the music folder";
-    }
-  });
+function togglePlay(){
+  if(current === -1){ playRandom(); return; }
+  if(playing){ audio.pause(); setPlaying(false); }
+  else{ audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false)); }
+}
 
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
-    if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
-    if (e.code === 'ArrowRight'){ nextSong(); }
-    if (e.code === 'ArrowLeft'){ prevSong(); }
-  });
+function resetSong(){
+  if(current === -1) return;
+  audio.currentTime = 0;
+}
 
-  /* ---------------- init ---------------- */
+function nextSong(){ if(SONGS.length) loadSong(current + 1, true); }
+function prevSong(){ if(SONGS.length) loadSong(current - 1, true); }
 
-  buildLibrary();
-  setPlaying(false);
+function setPlaying(p){
+  playing = p;
+  el.play.textContent = p ? "❚❚" : "▶";
+}
 
-})();
+function updateProgress(){
+  const d = audio.duration || 0;
+  const c = audio.currentTime || 0;
+  el.progressFill.style.width = (d ? (c/d*100) : 0) + "%";
+  el.currentT.textContent = formatTime(c);
+  el.durationT.textContent = formatTime(d);
+}
+
+function showView(name){
+  const home = name === 'home';
+  el.home.classList.toggle('active', home);
+  el.music.classList.toggle('active', !home);
+  el.navHome.classList.toggle('active', home);
+  el.navMusic.classList.toggle('active', !home);
+}
+
+el.navHome.addEventListener('click', () => { showView('home'); playRandom(); });
+el.navMusic.addEventListener('click', () => showView('music'));
+el.play.addEventListener('click', togglePlay);
+document.getElementById('reset').addEventListener('click', resetSong);
+document.getElementById('next').addEventListener('click', nextSong);
+document.getElementById('prev').addEventListener('click', prevSong);
+
+el.progress.addEventListener('click', (e) => {
+  const rect = el.progress.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  if(audio.duration) audio.currentTime = pct * audio.duration;
+});
+
+audio.addEventListener('timeupdate', updateProgress);
+audio.addEventListener('loadedmetadata', updateProgress);
+audio.addEventListener('ended', nextSong);
+audio.addEventListener('error', () => {
+  if(current !== -1) el.filename.textContent = "Couldn't load " + SONGS[current].file + " — check it's in the music folder";
+});
+
+renderList();
 </script>
-
 </body>
 </html>
