@@ -3,19 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Crispy Music" />
 <title>Crispy Music</title>
 <style>
   :root{
-    --bg: #1a1a1a;
-    --panel: #242424;
-    --accent: #ff8a3d;
-    --text: #f2f2f2;
-    --muted: #999;
+    --bg: #0e1614;
+    --panel: #172420;
+    --accent: #6be3a8;
+    --accent-2: #7c6bff;
+    --text: #eef5f1;
+    --muted: #7d9089;
+    --font-heading: "Futura", "Avenir Next", "Century Gothic", sans-serif;
+    --font-body: "Avenir Next", "Futura", -apple-system, sans-serif;
   }
   *{ box-sizing: border-box; }
   body{
     margin:0;
-    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-family: var(--font-body);
     background: var(--bg);
     color: var(--text);
   }
@@ -29,8 +35,11 @@
 
   h1{
     text-align:center;
-    font-size: 22px;
-    padding: 20px 0 4px;
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    padding: 26px 0 4px;
     margin:0;
   }
   h1 span{ color: var(--accent); }
@@ -41,19 +50,7 @@
   /* HOME */
   #home{ text-align:center; }
 
-  .cover{
-    width: 200px;
-    height: 200px;
-    margin: 20px auto;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--accent), #7a3cff);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: 60px;
-  }
-
-  #title{ font-size: 18px; font-weight:600; margin-top: 10px; }
+  #title{ font-family: var(--font-heading); font-size: 22px; font-weight:700; margin-top: 60px; }
   #filename{ font-size: 13px; color: var(--muted); margin-top: 2px; }
 
   .progress{
@@ -87,7 +84,7 @@
   #play{
     width: 62px; height: 62px;
     background: var(--accent);
-    color: #1a1a1a;
+    color: #0e1614;
     font-size: 22px;
   }
   .controls button:hover{ opacity: 0.85; }
@@ -117,11 +114,14 @@
     background:none;
     border:none;
     color: var(--muted);
-    padding: 14px 0;
-    font-size: 13px;
+    padding: 22px 0;
+    font-family: var(--font-heading);
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     cursor:pointer;
   }
-  nav button.active{ color: var(--accent); font-weight:600; }
+  nav button.active{ color: var(--accent); }
 
   audio{ display:none; }
 </style>
@@ -132,7 +132,6 @@
   <h1>Crispy <span>Music</span></h1>
 
   <section id="home" class="view active">
-    <div class="cover">🎵</div>
     <div id="title">Nothing playing</div>
     <div id="filename">Press Home to pick a random song</div>
 
@@ -149,6 +148,7 @@
       <button id="reset" title="Restart">⟲</button>
       <button id="play" title="Play">▶</button>
       <button id="next" title="Next">⏭</button>
+      <button id="share" title="Share">⇧</button>
     </div>
   </section>
 
@@ -298,6 +298,21 @@ el.play.addEventListener('click', togglePlay);
 document.getElementById('reset').addEventListener('click', resetSong);
 document.getElementById('next').addEventListener('click', nextSong);
 document.getElementById('prev').addEventListener('click', prevSong);
+document.getElementById('share').addEventListener('click', shareSong);
+
+function shareSong(){
+  const text = current === -1
+    ? "Check out Crispy Music 🎵"
+    : "Listening to \"" + (SONGS[current].title || SONGS[current].file) + "\" on Crispy Music 🎵";
+
+  if(navigator.share){
+    navigator.share({ text }).catch(() => {});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard:\n" + text));
+  } else {
+    alert(text);
+  }
+}
 
 el.progress.addEventListener('click', (e) => {
   const rect = el.progress.getBoundingClientRect();
