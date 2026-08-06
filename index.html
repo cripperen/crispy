@@ -11,6 +11,7 @@
   :root{
     --bg: #0e1614;
     --panel: #172420;
+    --panel-2: #1e2c26;
     --accent: #6be3a8;
     --accent-2: #7c6bff;
     --text: #eef5f1;
@@ -82,6 +83,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
+    position: relative;
   }
   .controls button svg{
     width: 20px;
@@ -94,6 +96,52 @@
   }
   #play svg{ width: 24px; height: 24px; }
   .controls button:hover{ opacity: 0.85; }
+  #more.active{ color: var(--accent); }
+
+  .dot{
+    position:absolute;
+    top:6px; right:6px;
+    width:7px; height:7px;
+    border-radius:50%;
+    background: var(--accent);
+    display:none;
+  }
+  .dot.show{ display:block; }
+
+  /* MORE PANEL */
+  .more-panel{
+    display:none;
+    margin-top: 16px;
+    background: var(--panel);
+    border-radius: 14px;
+    overflow:hidden;
+    text-align:left;
+  }
+  .more-panel.show{ display:block; }
+  .more-item{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding: 15px 16px;
+    background:none;
+    border:none;
+    border-bottom: 1px solid var(--panel-2);
+    color: var(--text);
+    font-size: 15px;
+    font-family: var(--font-body);
+    cursor:pointer;
+  }
+  .more-item:last-child{ border-bottom:none; }
+  .more-item svg{ width:20px; height:20px; flex-shrink:0; color: var(--muted); }
+  .more-item.active{ color: var(--accent); }
+  .more-item.active svg{ color: var(--accent); }
+  .more-status{
+    margin-left:auto;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .more-item.active .more-status{ color: var(--accent); }
 
   /* MUSIC LIST */
   #music h2{ font-size:18px; margin: 10px 0; }
@@ -165,12 +213,35 @@
       <button id="next" title="Next">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
       </button>
-      <button id="share" title="Share">
+      <button id="more" title="More">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>
+        <span class="dot" id="moreDot"></span>
+      </button>
+    </div>
+
+    <div class="more-panel" id="morePanel">
+      <button class="more-item" id="loopBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 16V4"/>
-          <path d="M7 9l5-5 5 5"/>
+          <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <span>Loop</span>
+        <span class="more-status" id="loopStatus">Off</span>
+      </button>
+      <button class="more-item" id="shuffleBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/>
+          <path d="M15 15l6 6"/><path d="M4 4l5 5"/>
+        </svg>
+        <span>Shuffle</span>
+        <span class="more-status" id="shuffleStatus">Off</span>
+      </button>
+      <button class="more-item" id="shareBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4"/><path d="M7 9l5-5 5 5"/>
           <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>
         </svg>
+        <span>Share this song</span>
       </button>
     </div>
   </section>
@@ -208,6 +279,7 @@ const MUSIC_FOLDER = "music/";
 const audio = document.getElementById('audio');
 let current = -1;
 let playing = false;
+let shuffleMode = false;
 
 const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
 const ICON_PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
@@ -226,6 +298,14 @@ const el = {
   navMusic: document.getElementById('navMusic'),
   home: document.getElementById('home'),
   music: document.getElementById('music'),
+  more: document.getElementById('more'),
+  moreDot: document.getElementById('moreDot'),
+  morePanel: document.getElementById('morePanel'),
+  loopBtn: document.getElementById('loopBtn'),
+  loopStatus: document.getElementById('loopStatus'),
+  shuffleBtn: document.getElementById('shuffleBtn'),
+  shuffleStatus: document.getElementById('shuffleStatus'),
+  shareBtn: document.getElementById('shareBtn'),
 };
 
 function formatTime(s){
@@ -267,6 +347,7 @@ function loadSong(i, autoplay){
   el.title.textContent = song.title || song.file;
   el.filename.textContent = song.file;
   highlightList();
+  updateMediaSession(song);
   if(autoplay){
     audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
   }
@@ -302,6 +383,9 @@ function setPlaying(p){
   playing = p;
   el.playIcon.innerHTML = p ? ICON_PAUSE : ICON_PLAY;
   el.play.title = p ? "Pause" : "Play";
+  if('mediaSession' in navigator){
+    navigator.mediaSession.playbackState = p ? "playing" : "paused";
+  }
 }
 
 function updateProgress(){
@@ -326,7 +410,33 @@ el.play.addEventListener('click', togglePlay);
 document.getElementById('reset').addEventListener('click', resetSong);
 document.getElementById('next').addEventListener('click', nextSong);
 document.getElementById('prev').addEventListener('click', prevSong);
-document.getElementById('share').addEventListener('click', shareSong);
+
+/* ---------------- More panel: Loop / Shuffle / Share ---------------- */
+
+el.more.addEventListener('click', () => {
+  const showing = el.morePanel.classList.toggle('show');
+  el.more.classList.toggle('active', showing);
+});
+
+el.loopBtn.addEventListener('click', () => {
+  audio.loop = !audio.loop;
+  el.loopBtn.classList.toggle('active', audio.loop);
+  el.loopStatus.textContent = audio.loop ? "On" : "Off";
+  updateMoreDot();
+});
+
+el.shuffleBtn.addEventListener('click', () => {
+  shuffleMode = !shuffleMode;
+  el.shuffleBtn.classList.toggle('active', shuffleMode);
+  el.shuffleStatus.textContent = shuffleMode ? "On" : "Off";
+  updateMoreDot();
+});
+
+el.shareBtn.addEventListener('click', shareSong);
+
+function updateMoreDot(){
+  el.moreDot.classList.toggle('show', audio.loop || shuffleMode);
+}
 
 function shareSong(){
   const text = current === -1
@@ -342,18 +452,87 @@ function shareSong(){
   }
 }
 
+/* ---------------- Progress bar ---------------- */
+
 el.progress.addEventListener('click', (e) => {
   const rect = el.progress.getBoundingClientRect();
   const pct = (e.clientX - rect.left) / rect.width;
   if(audio.duration) audio.currentTime = pct * audio.duration;
 });
 
+/* ---------------- Audio events ---------------- */
+
 audio.addEventListener('timeupdate', updateProgress);
 audio.addEventListener('loadedmetadata', updateProgress);
-audio.addEventListener('ended', nextSong);
+audio.addEventListener('play', () => {
+  setPlaying(true);
+  if(current !== -1) updateMediaSession(SONGS[current]);
+});
+audio.addEventListener('pause', () => setPlaying(false));
+audio.addEventListener('ended', () => {
+  // if loop is on, the browser restarts the song natively and 'ended' won't fire.
+  // this only runs for a normal, non-looping finish:
+  if(shuffleMode) playRandom();
+  else nextSong();
+});
 audio.addEventListener('error', () => {
   if(current !== -1) el.filename.textContent = "Couldn't load " + SONGS[current].file + " — check it's in the music folder";
 });
+
+/* ---------------- Lock screen / background playback controls ----------------
+   The Media Session API tells iOS/Android this page is playing media, so
+   playback keeps going and shows controls on the lock screen / control
+   center when your phone is locked or the browser is in the background.
+   It does NOT let a page start playing on its own without you pressing
+   play first — that part still needs one tap.
+------------------------------------------------------------------------ */
+function makeArtwork(){
+  // A simple generated icon, since individual songs don't have cover art.
+  // Some phones only show the full "Now Playing" info (title + artist)
+  // once artwork is present, so this makes the lock screen more reliable.
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 512, 512);
+  grad.addColorStop(0, '#6be3a8');
+  grad.addColorStop(1, '#7c6bff');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillStyle = '#0e1614';
+  ctx.font = '700 220px "Futura", "Avenir Next", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('♪', 256, 280);
+  return c.toDataURL('image/png');
+}
+const ARTWORK_URL = makeArtwork();
+
+function updateMediaSession(song){
+  if(!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: song.title || song.file,
+    artist: "Crispy Music",
+    artwork: [
+      { src: ARTWORK_URL, sizes: '512x512', type: 'image/png' }
+    ]
+  });
+}
+
+if('mediaSession' in navigator){
+  const safeHandler = (action, handler) => {
+    try{ navigator.mediaSession.setActionHandler(action, handler); }
+    catch(e){ /* not supported on this browser, ignore */ }
+  };
+  safeHandler('play', () => { audio.play(); });
+  safeHandler('pause', () => { audio.pause(); });
+  safeHandler('previoustrack', prevSong);
+  safeHandler('nexttrack', nextSong);
+  // Explicitly disable the 10s seek buttons so iOS shows previous/next
+  // track buttons on the lock screen instead.
+  safeHandler('seekbackward', null);
+  safeHandler('seekforward', null);
+  safeHandler('seekto', null);
+}
 
 renderList();
 setPlaying(false);
